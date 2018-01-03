@@ -10,12 +10,11 @@ function FluidDots(el, option) {
     var range = option.range || 15;
     var interval = option.interval || 15;
     
-    
     var particleHolder = [];
     var canvas = null;
     var lastMouse = {
-        x: -1,
-        y: -1
+        x: 0,
+        y: 0
     };
     var mouse = {
         x: 0,
@@ -41,14 +40,8 @@ function FluidDots(el, option) {
         el.appendChild(canvas);
         canvas.width = el.offsetWidth;
         canvas.height = el.offsetHeight;
-        canvas.addEventListener('mousemove', MouseMove, false);
+        canvas.addEventListener('mousemove', mouseMove, false);
         
-        function MouseMove(event) {
-            lastMouse.x = mouse.x;
-            lastMouse.y = mouse.y;
-            mouse.x = event.pageX - canvas.offsetLeft;
-            mouse.y = event.pageY - canvas.offsetLeft;
-        }
         var wl = canvas.width / margin - 1;
         var hl = canvas.height / margin - 1;
         for (i = 1; i < hl; i++) {
@@ -57,43 +50,50 @@ function FluidDots(el, option) {
             }
         }
         
-        function generateParticles(i, j) {
-            this.x = j * margin;
-            this.y = i * margin;
-            this.color = color;
-            this.rad = radius;
-        }
-        
+        draw(range, 0);
         animate();
     };
-    
+
+    function generateParticles(i, j) {
+        this.x = j * margin;
+        this.y = i * margin;
+        this.color = color;
+        this.rad = radius;
+    }
+
+    function mouseMove(event) {
+        lastMouse.x = mouse.x;
+        lastMouse.y = mouse.y;
+        mouse.x = event.pageX - canvas.offsetLeft;
+        mouse.y = event.pageY - canvas.offsetLeft;
+        animate.move = true;
+        if (mouseMove.timer) {
+            clearTimeout(mouseMove.timer);
+        }
+        mouseMove.timer = setTimeout(function () {
+            animate.move = false;
+        }, 10);
+    }
+
     function animate() {
-        if (animate.timeout) {
-            clearInterval(animate.timeout);
+        if (animate.move) {
+            animate.step = start;
+            draw(range, start);
         }
-        if (Math.abs(lastMouse.x - mouse.x) < 2 && Math.abs(lastMouse.y - mouse.y) < 2) {
-            animate.timeout = setTimeout(animate, 10);
-            return;
+        else {
+            stop();
         }
-        
-        if (animate.interval) {
-            clearInterval(animate.interval);
+        setTimeout(animate, 10);
+    }
+
+    function stop() {
+        var step = animate.step;
+        var move = animate.move;
+        if (step < range * 0.65 && !move) {
+            step += 0.08;
+            draw(range, step);
         }
-        var step = start;
-        draw(range, step);
-        
-        animate.interval = setInterval(function () {
-            if (step < range * 0.65) {
-                step += 0.08;
-                draw(range, step);
-            }
-            else {
-                step = 0;
-                clearInterval(animate.interval);
-            }
-        }, interval);
-        
-        animate.timeout = setTimeout(animate, 10);
+        animate.step = step;
     }
     
     function draw(range, step) {
