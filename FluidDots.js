@@ -51,7 +51,7 @@ function FluidDots(el, option) {
         }
         
         draw(range, 0);
-        animate();
+        window.requestAnimationFrame(animate);
     };
 
     function generateParticles(i, j) {
@@ -64,8 +64,9 @@ function FluidDots(el, option) {
     function mouseMove(event) {
         lastMouse.x = mouse.x;
         lastMouse.y = mouse.y;
-        mouse.x = event.pageX - canvas.offsetLeft;
-        mouse.y = event.pageY - canvas.offsetLeft;
+        var offset = getOffset(canvas)
+        mouse.x = event.pageX - offset.left;
+        mouse.y = event.pageY - offset.top;
         animate.move = true;
         if (mouseMove.timer) {
             clearTimeout(mouseMove.timer);
@@ -73,6 +74,21 @@ function FluidDots(el, option) {
         mouseMove.timer = setTimeout(function () {
             animate.move = false;
         }, 10);
+    }
+
+    function getOffset(ele) {
+        var position = getComputedStyle(ele);
+        var offset = {};
+        if (position === 'absolute') {
+            offset = getOffset(ele.parentElement);
+        }
+        else {
+            offset = {
+                left: ele.offsetLeft,
+                top: ele.offsetTop
+            };
+        }
+        return offset;
     }
 
     function animate() {
@@ -83,7 +99,7 @@ function FluidDots(el, option) {
         else {
             stop();
         }
-        setTimeout(animate, 10);
+        window.requestAnimationFrame(animate);
     }
 
     function stop() {
