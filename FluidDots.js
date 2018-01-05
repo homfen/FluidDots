@@ -32,6 +32,7 @@ function FluidDots(el, option) {
         interval: interval
     };
     this.canvas = canvas;
+    this.move = mouseMove;
     
     init();
     
