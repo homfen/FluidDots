@@ -78,7 +78,7 @@ function FluidDots(el, option) {
     }
 
     function getOffset(ele) {
-        var position = getComputedStyle(ele);
+        var position = getComputedStyle(ele).position;
         var offset = {};
         if (position === 'absolute') {
             offset = getOffset(ele.parentElement);
